@@ -1,6 +1,7 @@
 from collections import Counter
 import re
 import urllib
+import urllib.request
 from torch.utils.data import TensorDataset,DataLoader
 import torch.nn as nn
 import torch.optim as optim
@@ -8,19 +9,26 @@ import torch.nn.functional as F
 import torch
 
 print("Downloading book[Pride and Prejudice]")
-url="https://www.gutenberg.org/files/1342/1342-0.txt"
-response=urllib.request.urlopen(url)
-full_text=response.read().decode('utf-8').lower()
+urls=[
+    "https://www.gutenberg.org/files/1342/1342-0.txt",  # Pride and Prejudice
+    "https://www.gutenberg.org/files/84/84-0.txt",      # Frankenstein
+    "https://www.gutenberg.org/files/11/11-0.txt",      # Alice in Wonderland
+    "https://www.gutenberg.org/files/1661/1661-0.txt"   # Sherlock Holmes
+]
+words=[]
+for url in urls:
+    response=urllib.request.urlopen(url)
+    full_text=response.read().decode('utf-8').lower()
 
 #to remove legal header
-start="start of the project gutenberg ebook"
-if start in full_text:
-    story=full_text.split(start)[1]
-else:
-    story=full_text
+    start="start of the project gutenberg ebook"
+    if start in full_text:
+        story=full_text.split(start)[1]
+    else:
+        story=full_text
+    words.extend(re.sub(r'[^a-z\s]', '', story).split()[:50000])
 
-words=re.sub(r'[^a-z\s]','',story).split()
-text=words[:100000]
+text=words
 #print(f"{len(text)} words.")
 
 word_counts=Counter(text)
@@ -63,9 +71,8 @@ class SimpleWord2Vec(nn.Module):
         embeds=self.embedding(x)
         return self.linear(embeds)
 
-EMBED_DIM=50 
-EPOCHS=15
-print("\nstarting model")
+EMBED_DIM=50
+EPOCHS=10
 model=SimpleWord2Vec(vocabSize,EMBED_DIM)
 criterion=nn.CrossEntropyLoss()
 optimizer=optim.Adam(model.parameters(),lr=0.01)
@@ -103,6 +110,6 @@ def test(w1,w2,w3,model,wordint,intword):
         results=[w for w in closest if w[0] not in [w1,w2,w3]]
         for word,score in results[:3]:
             print(f"{word} (Score: {score})")
-test("darcy","man","woman",model,wordint,intword)
+test("king","man","woman",model,wordint,intword)
 test("brother","boy","girl",model,wordint,intword)
 test("bingley","jane","elizabeth",model,wordint,intword)
