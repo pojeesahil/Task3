@@ -1,4 +1,5 @@
 from collections import Counter
+import os
 import re
 import urllib
 import urllib.request
@@ -8,17 +9,25 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torch
 
-print("Downloading book[Pride and Prejudice]")
-urls=[
-    "https://www.gutenberg.org/files/1342/1342-0.txt",  # Pride and Prejudice
-    "https://www.gutenberg.org/files/84/84-0.txt",      # Frankenstein
-    "https://www.gutenberg.org/files/11/11-0.txt",      # Alice in Wonderland
-    "https://www.gutenberg.org/files/1661/1661-0.txt"   # Sherlock Holmes
-]
+print("Downloading books")
+urls={
+    "pride_and_prejudice.txt":"https://www.gutenberg.org/files/1342/1342-0.txt",
+    "frankenstein.txt":"https://www.gutenberg.org/files/84/84-0.txt",
+    "alice_in_wonderland.txt":"https://www.gutenberg.org/files/11/11-0.txt",
+    "sherlock_holmes.txt":"https://www.gutenberg.org/files/1661/1661-0.txt",
+    "moby_dick.txt":"https://www.gutenberg.org/files/2701/2701-0.txt",
+    "tale_of_two_cities.txt":"https://www.gutenberg.org/files/98/98-0.txt",
+    "dracula.txt":"https://www.gutenberg.org/files/345/345-0.txt",
+    "dorian_gray.txt":"https://www.gutenberg.org/files/174/174-0.txt",
+    "great_gatsby.txt":"https://www.gutenberg.org/files/64317/64317-0.txt",
+    "grimms_fairy_tales.txt":"https://www.gutenberg.org/files/2591/2591-0.txt"
+}
 words=[]
-for url in urls:
-    response=urllib.request.urlopen(url)
-    full_text=response.read().decode('utf-8').lower()
+for filename,url in urls.items():
+    if not os.path.exists(filename):
+        urllib.request.urlretrieve(url,filename)
+    with open(filename,'r',encoding='utf-8') as f:
+        full_text=f.read().lower()
 
 #to remove legal header
     start="start of the project gutenberg ebook"
@@ -26,7 +35,7 @@ for url in urls:
         story=full_text.split(start)[1]
     else:
         story=full_text
-    words.extend(re.sub(r'[^a-z\s]', '', story).split()[:50000])
+    words.extend(re.sub(r'[^a-z\s]', '', story).split()[:30000])
 
 text=words
 #print(f"{len(text)} words.")
