@@ -1,4 +1,5 @@
 from collections import Counter
+import csv
 import os
 import re
 import urllib
@@ -23,7 +24,9 @@ urls={
     "grimms_fairy_tales.txt":"https://www.gutenberg.org/files/2591/2591-0.txt"
 }
 words=[]
+os.makedirs('books',exist_ok=True)
 for filename,url in urls.items():
+    filename=f"books/{filename}"
     if not os.path.exists(filename):
         urllib.request.urlretrieve(url,filename)
     with open(filename,'r',encoding='utf-8') as f:
@@ -119,6 +122,27 @@ def test(w1,w2,w3,model,wordint,intword):
         results=[w for w in closest if w[0] not in [w1,w2,w3]]
         for word,score in results[:3]:
             print(f"{word} (Score: {score})")
-test("king","man","woman",model,wordint,intword)
-test("brother","boy","girl",model,wordint,intword)
-test("bingley","jane","elizabeth",model,wordint,intword)
+test("king","man","woman")
+print("\nbatch tests")
+scount=0
+ttests=0
+with open('test.csv','r') as file:
+    reader=csv.reader(file)
+    next(reader) 
+    for row in reader:
+        w1,w2,w3,ans=row
+        if all(w in wordint for w in [w1,w2,w3,ans]):
+            ttests+=1
+            v1=model.embedding.weight[wordint[w1]]
+            v2=model.embedding.weight[wordint[w2]]
+            v3=model.embedding.weight[wordint[w3]]
+            tvector=v1-v2+v3
+            similarities=F.cosine_similarity(tvector.unsqueeze(0),model.embedding.weight)
+            tscores,tindices=torch.topk(similarities,5)
+            closest=[(intword[idx.item()],score.item()) for score,idx in zip(tscores,tindices)]
+            results=[w for w in closest if w[0] not in [w1,w2,w3]]
+            topans=results[0][0] if results else None
+            if topans==ans:
+                scount+=1
+                
+print(f"accuracy: {scount}/{ttests} ({(scount/ttests)*100 if ttests>0 else 0:.2f}%)")
