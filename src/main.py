@@ -94,7 +94,7 @@ class SimpleWord2Vec(nn.Module):
         return self.linear(embeds)
 
 EMBED_DIM=50
-EPOCHS=15
+EPOCHS=10
 model=SimpleWord2Vec(vocabSize,EMBED_DIM)
 criterion=nn.CrossEntropyLoss()
 optimizer=optim.Adam(model.parameters(),lr=0.01)
@@ -131,9 +131,17 @@ def test(w1,w2,w3,model,wordint,intword):
         results=[w for w in closest if w[0] not in [w1,w2,w3]]
         for word,score in results[:3]:
             print(f"{word} (Score: {score})")
-#test("king","man","woman")
+#Was checking misogyny since i trained it on old books(lower model was somehow sexist against boys for some reason, brother-boy+girl=undesirable,etc)
+test("queen","woman","man",model,wordint,intword)
+test("mother","woman","man",model,wordint,intword)
+test("sister","girl","boy",model,wordint,intword)
+test("aunt","woman","man",model,wordint,intword)
+test("wife","woman","man",model,wordint,intword)
 test("king","man","woman",model,wordint,intword)
-test("brother","man","woman",model,wordint,intword)
+test("father","man","woman",model,wordint,intword)
+test("brother","boy","girl",model,wordint,intword)
+test("uncle","man","woman",model,wordint,intword)
+test("husband","man","woman",model,wordint,intword)
 print("Accuracy of General words and book specific words")
 for cfile in ["test.csv","test2.csv"]:
  scount=0
