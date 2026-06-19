@@ -1,4 +1,14 @@
-**My Approach:**
+## How to Run ##
+```cd src```
+
+```pip install torch ```
+
+```python main.py```
+
+
+
+## My Approach: ##
+
 I choose Paper 3(**Word2Vec**)
 So I merged 20 books from Gutenberg for a dataset taking 30,000 words from each book
 This led to 11,324 unique words, I trained this model to predict surrounding context of any given words, It learned to map to 50 dimensional vector space
@@ -31,3 +41,7 @@ Now this is obviously disappointing compared to original paper accuracy which wa
 **Syntactic Accuracy:** 61%
 **Overall Accuracy:** 65%
 However using more than 10,000 times lesser words compared to paper, I think its still impressive
+
+**Final Output**
+
+<img width="856" height="420" alt="Screenshot 2026-06-18 214614" src="https://github.com/user-attachments/assets/b8c34912-af45-4791-86ab-6cad5601b6d2" />
